@@ -25,8 +25,6 @@ export default class PathfindingVisualizer extends Component {
   componentDidMount() {
     const grid = getInitialGrid();
     this.setState({grid});
-
-    document.addEventListener('click', this.handleClickOutside);
   }
 
   handleMouseDown(row, col) {
@@ -67,6 +65,8 @@ export default class PathfindingVisualizer extends Component {
     } else {
       const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
       this.setState({grid: newGrid, mouseIsPressed: true});
+      document.getElementById(`node-${row}-${col}`).className =
+        'node node-wall';
     }
   }
 
@@ -74,6 +74,7 @@ export default class PathfindingVisualizer extends Component {
     if (!this.state.mouseIsPressed) return;
     const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
     this.setState({grid: newGrid});
+    document.getElementById(`node-${row}-${col}`).className = 'node node-wall';
   }
 
   handleMouseUp() {
@@ -162,6 +163,145 @@ export default class PathfindingVisualizer extends Component {
       'Total Time: ' + elasped + 'ms';
   }
 
+  randomMaze() {
+    const {grid} = this.state;
+    const newGrid = grid.slice();
+    var path = [];
+    var random = Math.floor(Math.random() * 20);
+    var random2 = Math.floor(Math.random() * 50);
+
+    for (var i = 0; i < newGrid.length; i++) {
+      for (var j = 0; j < newGrid[i].length; j++) {
+        if (j % 2 !== 0) {
+          if (i === random || i === random2) {
+            continue;
+          }
+          const node = newGrid[i][j];
+
+          const newNode = {
+            ...node,
+            isWall: true,
+          };
+          newGrid[i][j] = newNode;
+          path.push(newNode);
+        }
+        random = Math.floor(Math.random() * 27);
+        random2 = Math.floor(Math.random() * 80);
+      }
+    }
+    this.animateWall(path);
+    this.setState({grid: newGrid});
+  }
+
+  getUnvisitedNeighbors(node, grid) {
+    const neighbors = [];
+    const {col, row} = node;
+    if (row > 0) neighbors.push(grid[row - 1][col]);
+    if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
+    if (col > 0) neighbors.push(grid[row][col - 1]);
+    if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
+    return neighbors;
+  }
+
+  startDfs(nodeinput, stack, newGrid) {
+    var unvisitedNeighbors = this.getUnvisitedNeighbors(nodeinput, newGrid);
+
+    //var random = Math.floor(Math.random() * (unvisitedNeighbors.length - 1));
+    // var nodeToSkip = unvisitedNeighbors[random];
+
+    for (var i = 0; i < unvisitedNeighbors.length; i++) {
+      //if (unvisitedNeighbors[i] !== nodeToSkip) {
+      unvisitedNeighbors[i].isVisited = true;
+      stack.push(unvisitedNeighbors[i]);
+      // }
+
+      while (unvisitedNeighbors[i].isVisited !== true) {
+        this.startDfs(unvisitedNeighbors[i], stack, newGrid);
+      }
+    }
+  }
+
+  drawDown(node, newGrid, path) {
+    var random = Math.floor(Math.random() * 26);
+
+    var count = 0;
+    for (var i = 0; i < 26; i++) {
+      for (var j = 0; j < 26; j++) {
+        if (j === count) {
+          if (j === random) {
+          } else {
+            node = newGrid[i][j];
+            node.isWall = true;
+            path.push(node);
+          }
+        }
+      }
+      count++;
+    }
+  }
+
+  drawDown2(node, newGrid, path) {
+    var random = Math.floor(Math.random() * (74 - 50) + 50);
+    var count = 50;
+    for (var i = 0; i < 26; i++) {
+      for (var j = 50; j < 76; j++) {
+        if (j === count) {
+          if (j === random) {
+          } else {
+            node = newGrid[i][j];
+            node.isWall = true;
+            path.push(node);
+          }
+        }
+      }
+      count++;
+    }
+  }
+
+  drawUp(node, newGrid, path) {
+    var random = Math.floor(Math.random() * (50 - 25) + 25);
+    var count = 25;
+    for (var k = 25; k >= 0; k--) {
+      for (var l = 25; l < 52; l++) {
+        if (l === count) {
+          if (l === random) {
+          } else {
+            node = newGrid[k][l];
+            node.isWall = true;
+            path.push(node);
+          }
+        }
+      }
+      count++;
+    }
+  }
+
+  stairPattern() {
+    const {grid} = this.state;
+    const newGrid = grid.slice();
+    var path = [];
+
+    var node;
+    //var column = 0;
+    this.drawDown(node, newGrid, path);
+    this.drawUp(node, newGrid, path);
+    this.drawDown2(node, newGrid, path);
+
+    this.animateWall(path);
+  }
+
+  animateWall(path) {
+    for (let i = 0; i <= path.length; i++) {
+      if (path[i] !== undefined) {
+        setTimeout(() => {
+          document.getElementById(
+            `node-${path[i].row}-${path[i].col}`,
+          ).className = 'node node-wall';
+        }, 15 * i);
+      }
+    }
+  }
+
   visualizeDijkstra() {
     var nodesInShortestPathOrder = [];
     var visitedNodesInOrder = [];
@@ -188,33 +328,35 @@ export default class PathfindingVisualizer extends Component {
           <div className="top_nav">
             <h3>PathFinding Visualizer</h3>
 
-            <nav role="navigation" class="primary-navigation">
+            <nav role="navigation" className="primary-navigation">
               <ul>
                 <li>
                   <button>Algorithms</button>
-                  <ul class="dropdown">
+                  <ul className="dropdown">
                     <li>
-                      <button href="#">Dijkstra</button>
+                      <button>Dijkstra</button>
                     </li>
                     <li>
-                      <button href="#">Depth First</button>
+                      <button>Depth First</button>
                     </li>
                     <li>
-                      <button href="#">Breadth First</button>
+                      <button>Breadth First</button>
                     </li>
                     <li>
-                      <button href="#">Swarm</button>
+                      <button>Swarm</button>
                     </li>
                   </ul>
                 </li>
                 <li>
-                  <button href="#">Maizes and Patterns</button>
-                  <ul class="dropdown">
+                  <button>Maizes and Patterns</button>
+                  <ul className="dropdown">
                     <li>
-                      <button href="#">Random Maze</button>
+                      <button onClick={() => this.stairPattern()}>
+                        Stair Pattern
+                      </button>
                     </li>
                     <li>
-                      <button href="#">Recursive division</button>
+                      <button>Recursive division</button>
                     </li>
                   </ul>
                 </li>
@@ -224,7 +366,6 @@ export default class PathfindingVisualizer extends Component {
             <div id="middle">
               <button
                 type="button"
-                class="btn btn-primary"
                 className="letsBegin"
                 onClick={() => this.visualizeDijkstra()}>
                 Visualize
