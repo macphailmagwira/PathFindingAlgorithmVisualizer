@@ -12,6 +12,7 @@ var elasped;
 var selectingNodes = false;
 var startNodeChange = false;
 var finishNodeChange = false;
+var wallPath = [];
 
 export default class PathfindingVisualizer extends Component {
   constructor() {
@@ -116,24 +117,34 @@ export default class PathfindingVisualizer extends Component {
   }
 
   resetBoard(visitedNodesInOrder, nodesInShortestPathOrder) {
-    window.location.reload();
+    // window.location.reload();
 
-    /*for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-      const node = visitedNodesInOrder[i];
-
-      if (!node.isStart && !node.isFinish) {
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      var node = visitedNodesInOrder[i];
+      if (node && !node.isStart && !node.isFinish) {
         document.getElementById(`node-${node.row}-${node.col}`).className =
           'node ';
-      } else if (node.isStart) {
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          'node node-start ';
-      } else if (node.isFinish) {
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          'node node-finish ';
       }
     }
 
-    boardToClear = [];*/
+    boardToClear = [];
+  }
+
+  resetWall() {
+    // window.location.reload();
+
+    for (let i = 0; i <= wallPath.length; i++) {
+      var node = wallPath[i];
+      if (
+        node !== undefined &&
+        node.row !== undefined &&
+        node.col !== undefined
+      ) {
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          'node ';
+        node.isWall = false;
+      }
+    }
   }
 
   animateShortestPath(nodesInShortestPathOrder) {
@@ -233,6 +244,7 @@ export default class PathfindingVisualizer extends Component {
             node = newGrid[i][j];
             node.isWall = true;
             path.push(node);
+            wallPath.push(node);
           }
         }
       }
@@ -250,6 +262,7 @@ export default class PathfindingVisualizer extends Component {
           } else {
             node = newGrid[i][j];
             node.isWall = true;
+            wallPath.push(node);
             path.push(node);
           }
         }
@@ -268,6 +281,7 @@ export default class PathfindingVisualizer extends Component {
           } else {
             node = newGrid[k][l];
             node.isWall = true;
+            wallPath.push(node);
             path.push(node);
           }
         }
@@ -277,6 +291,7 @@ export default class PathfindingVisualizer extends Component {
   }
 
   stairPattern() {
+    console.log('I pressed you');
     const {grid} = this.state;
     const newGrid = grid.slice();
     var path = [];
@@ -373,7 +388,10 @@ export default class PathfindingVisualizer extends Component {
               <button
                 className="reset"
                 onClick={() => this.resetBoard(boardToClear)}>
-                Reset Board
+                Clear Path
+              </button>
+              <button className="reset" onClick={() => this.resetWall()}>
+                Remove Wall
               </button>
 
               <button className="reset" onClick={() => this.selectNodes()}>
@@ -456,5 +474,6 @@ const getNewGridWithWallToggled = (grid, row, col) => {
     isWall: !node.isWall,
   };
   newGrid[row][col] = newNode;
+  wallPath.push(newNode);
   return newGrid;
 };
