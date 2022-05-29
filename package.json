@@ -1,7 +1,7 @@
 {
   "name": "my-app",
   "version": "0.1.0",
-  "homepage" : "http://macphailmagwira.github.io/pathfindingalgorithm",
+  "homepage" : "http://macphailmagwira.github.io/PathFindingAlgorithm",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
