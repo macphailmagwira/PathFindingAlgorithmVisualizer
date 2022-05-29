@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Node from './Node/Node';
 import {dijkstra, getNodesInShortestPathOrder} from '../algorithms/dijkstra';
+import {startDfs} from '../algorithms/dfs';
 
 import './PathfindingVisualizer.css';
 var START_NODE_ROW = 13;
@@ -96,6 +97,20 @@ export default class PathfindingVisualizer extends Component {
         }, 15 * i);
         return;
       }
+      setTimeout(() => {
+        const node = visitedNodesInOrder[i];
+        if (!node.isStart && !node.isFinish) {
+          document.getElementById(`node-${node.row}-${node.col}`).className =
+            'node node-visited';
+        }
+      }, 15 * i);
+    }
+  }
+
+  animateDijkstra2(visitedNodesInOrder) {
+    this.animateStartFinish();
+
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
         if (!node.isStart && !node.isFinish) {
@@ -204,34 +219,6 @@ export default class PathfindingVisualizer extends Component {
     this.setState({grid: newGrid});
   }
 
-  getUnvisitedNeighbors(node, grid) {
-    const neighbors = [];
-    const {col, row} = node;
-    if (row > 0) neighbors.push(grid[row - 1][col]);
-    if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-    if (col > 0) neighbors.push(grid[row][col - 1]);
-    if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-    return neighbors;
-  }
-
-  startDfs(nodeinput, stack, newGrid) {
-    var unvisitedNeighbors = this.getUnvisitedNeighbors(nodeinput, newGrid);
-
-    //var random = Math.floor(Math.random() * (unvisitedNeighbors.length - 1));
-    // var nodeToSkip = unvisitedNeighbors[random];
-
-    for (var i = 0; i < unvisitedNeighbors.length; i++) {
-      //if (unvisitedNeighbors[i] !== nodeToSkip) {
-      unvisitedNeighbors[i].isVisited = true;
-      stack.push(unvisitedNeighbors[i]);
-      // }
-
-      while (unvisitedNeighbors[i].isVisited !== true) {
-        this.startDfs(unvisitedNeighbors[i], stack, newGrid);
-      }
-    }
-  }
-
   drawDown(node, newGrid, path) {
     var random = Math.floor(Math.random() * 26);
 
@@ -324,14 +311,19 @@ export default class PathfindingVisualizer extends Component {
     const startNode = grid[START_NODE_ROW][START_NODE_COL];
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
     var start = new Date().getTime();
-    visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
-
+    visitedNodesInOrder = dijkstra(
+      grid,
+      startNode,
+      finishNode,
+      visitedNodesInOrder,
+    );
+    console.log(visitedNodesInOrder);
     boardToClear = visitedNodesInOrder;
     nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
     var stop = new Date().getTime();
     elasped = stop - start;
 
-    this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
+    this.animateDijkstra2(visitedNodesInOrder);
   }
 
   render() {
@@ -349,16 +341,9 @@ export default class PathfindingVisualizer extends Component {
                   <button>Algorithms</button>
                   <ul className="dropdown">
                     <li>
-                      <button>Dijkstra</button>
-                    </li>
-                    <li>
-                      <button>Depth First</button>
-                    </li>
-                    <li>
-                      <button>Breadth First</button>
-                    </li>
-                    <li>
-                      <button>Swarm</button>
+                      <button onClick={() => this.visualizeDijkstra()}>
+                        Dijkstra
+                      </button>
                     </li>
                   </ul>
                 </li>
@@ -369,9 +354,6 @@ export default class PathfindingVisualizer extends Component {
                       <button onClick={() => this.stairPattern()}>
                         Stair Pattern
                       </button>
-                    </li>
-                    <li>
-                      <button>Recursive division</button>
                     </li>
                   </ul>
                 </li>
