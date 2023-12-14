@@ -1,5 +1,5 @@
 <a href="https://algorithm-visualizer.vercel.app/">
-    <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fgithub.com%2Fraj457036%2FPath-Finding-Visualizer&psig=AOvVaw337uPKsd37Gjgg1UBZHiul&ust=1702633779858000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPDOxqbTjoMDFQAAAAAdAAAAABAI" align="left" height="70" />
+    <img src="https://repository-images.githubusercontent.com/238922251/8f591e00-49d7-11ea-8716-c5f365ac82ef" align="left" height="70" />
 </a>
 <br/><br/>
 
